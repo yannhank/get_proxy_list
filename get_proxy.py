@@ -1,30 +1,41 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
 import requests
-from bs4 import BeautifulSoup
+import json
+import telnetlib
 
 def start():
-    """
-    获取快代理上的代理
-    :return: 代理列表
-    """
-    proxies = []
-    url = 'https://www.kuaidaili.com/free/inha/1/'
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0;Win64) AppleWebit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
-    response = requests.get(url=url, headers=headers)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    table = soup.find('table', {'class': 'table table-bordered table-striped'})
-    tbody = table.find('tbody')
-    trs = tbody.find_all('tr')
-    for tr in trs:
-        #print(".")
-        tds = tr.find_all('td')
-        if tds[2].text == '高匿名' and tds[3].text == 'HTTP':
-            print(tds[0].text,tds[1].text,tds[2].text,tds[3].text)
-            proxies.append('http://{}:{}'.format(tds[0].text, tds[1].text))
-    print(proxies)
+    url = "https://raw.githubusercontent.com/fate0/proxylist/master/proxy.list"
+    # 发送GET请求
+    proxy_list = []
+    response = requests.get(url)
+    # 检查响应状态码
+    if response.status_code == 200:
+        # 获取响应内容
+        data = response.text
+        arr = data.split("\n")
+        for s in arr:
+            if len(s)>20:
+                json_data = json.loads(s)
+                ty = json_data['type']
+                host = json_data['host']
+                port = json_data['port']
+                strs = ty + "://" + str(host) + ":" + str(port)
+                proxy_list.append(strs)
+                if verify(host,port):
+                    proxy_list.append(strs)
+        print(proxy_list)
+    else:
+        print("请求失败，状态码：" + str(response.status_code))
 
-if __name__ == "__main__":
+def verify(ip,port):
+    try:
+        telnet = telnetlib.Telnet(ip,port=port,timeout=3)
+    except:
+        return False
+    else:
+        return True
+
+if __name__ == '__main__':
     start()
+
