@@ -27,4 +27,4 @@ def start():
     print(proxies)
 
 if __name__ == "__main__":
-    login()
+    start()
