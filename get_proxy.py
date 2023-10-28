@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import requests
 import json
-import telnetlib
+import socket
 
 def start():
     url = "https://raw.githubusercontent.com/fate0/proxylist/master/proxy.list"
@@ -30,11 +30,22 @@ def start():
 
 def verify(ip,port):
     try:
-        telnet = telnetlib.Telnet(ip,port=port,timeout=3)
-    except:
+        # 创建socket对象
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # 设置超时时间为2秒
+        sock.settimeout(2)
+        # 尝试连接IP和端口
+        result = sock.connect_ex((ip, port))
+        # 检查连接结果
+        if result == 0:
+            return True
+        else:
+            return False
+        # 关闭socket连接
+        sock.close()
+    except socket.error as e:
+        print(f"发生错误：{e}")
         return False
-    else:
-        return True
 
 if __name__ == '__main__':
     start()
